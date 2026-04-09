@@ -2,8 +2,6 @@ resource "aws_wafv2_web_acl" "cloudfront_waf" {
   name  = "cloudfront-waf-acl"
   scope = "CLOUDFRONT"
 
-  provider = aws.us-east-1
-
   default_action {
     allow {}
   }

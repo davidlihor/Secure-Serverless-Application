@@ -213,9 +213,7 @@ resource "aws_cloudwatch_metric_alarm" "low_compliance" {
   alarm_actions       = [aws_sns_topic.config_updates.arn]
 
   tags = {
-    Name        = "${var.project_name}-LowComplianceAlarm"
-    Project     = var.project_name
-    Environment = var.environment
+    Name = "${var.project_name}-LowComplianceAlarm"
   }
 }
 
@@ -232,8 +230,6 @@ resource "aws_cloudwatch_metric_alarm" "remediation_failures" {
   alarm_actions       = [aws_sns_topic.config_updates.arn]
 
   tags = {
-    Name        = "${var.project_name}-RemediationFailureAlarm"
-    Project     = var.project_name
-    Environment = var.environment
+    Name = "${var.project_name}-RemediationFailureAlarm"
   }
 }

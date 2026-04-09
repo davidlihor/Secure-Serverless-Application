@@ -166,8 +166,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   }
 
   tags = {
-    Name        = "CloudStack-Distribution"
-    Environment = "Production"
+    Name = "${var.project_name}-Distribution"
   }
 }
 

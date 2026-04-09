@@ -37,10 +37,7 @@ module "vpc" {
   }
 
   tags = {
-    Name        = "${var.project_name}-vpc"
-    Project     = var.project_name
-    Environment = var.environment
-    ManagedBy   = "Terraform"
-    Security    = "High-Compliance"
+    Name     = "${var.project_name}-vpc"
+    Security = "High-Compliance"
   }
 }

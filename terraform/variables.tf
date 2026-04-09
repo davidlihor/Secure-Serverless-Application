@@ -33,3 +33,9 @@ variable "budget_alert_emails" {
   type        = list(string)
   default     = ["mail@example.com"]
 }
+
+variable "resizer_reserved_concurrency" {
+  description = "Reserved concurrency limit for resizer Lambda (null for no limit)"
+  type        = number
+  default     = 10
+}

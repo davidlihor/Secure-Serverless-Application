@@ -14,9 +14,11 @@ resource "aws_dynamodb_table" "cloudstack_table" {
     type = "S"
   }
 
+  point_in_time_recovery {
+    enabled = var.is_production
+  }
+
   tags = {
-    Name        = "CloudStackTable"
-    Project     = "CloudStack"
-    Environment = "Dev"
+    Name = "${var.project_name}-Table"
   }
 }

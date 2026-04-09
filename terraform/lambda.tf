@@ -16,7 +16,8 @@ resource "aws_lambda_function" "cloudstack_lambdas" {
   memory_size = each.value.memory
   timeout     = each.value.timeout
 
-  layers = each.key == "resizer" ? ["arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p312-Pillow:7"] : []
+  reserved_concurrent_executions = each.key == "resizer" ? var.resizer_reserved_concurrency : null
+  layers                         = each.key == "resizer" ? ["arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p312-Pillow:7"] : []
 
   filename         = data.archive_file.lambda_zip[each.key].output_path
   source_code_hash = data.archive_file.lambda_zip[each.key].output_base64sha256
