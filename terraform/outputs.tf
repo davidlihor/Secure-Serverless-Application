@@ -1,11 +1,11 @@
+output "app_url" {
+  description = "The principal URL for accessing the application"
+  value       = var.domain_name != null ? "https://${var.domain_name}" : "https://${aws_cloudfront_distribution.s3_distribution.domain_name}"
+}
+
 output "s3_website_url" {
   description = "S3 bucket website endpoint URL"
   value       = module.s3-bucket.s3_bucket_website_endpoint
-}
-
-output "cloudfront_url" {
-  description = "CloudFront distribution domain name"
-  value       = aws_cloudfront_distribution.s3_distribution.domain_name
 }
 
 output "api_gateway_url" {
@@ -43,11 +43,6 @@ output "cloudfront_domain_name" {
 output "waf_web_acl_id" {
   value       = aws_wafv2_web_acl.cloudfront_waf.id
   description = "WAF Web ACL ID"
-}
-
-output "api_endpoint_via_cloudfront" {
-  value       = "https://${aws_cloudfront_distribution.s3_distribution.domain_name}/tasks"
-  description = "API endpoint via CloudFront"
 }
 
 output "vpc_id" {

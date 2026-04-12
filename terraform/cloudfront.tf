@@ -1,4 +1,14 @@
 resource "aws_cloudfront_distribution" "s3_distribution" {
+
+  aliases = var.domain_name != null ? [var.domain_name] : []
+
+  viewer_certificate {
+    cloudfront_default_certificate = var.domain_name == null
+    acm_certificate_arn            = var.domain_name != null ? aws_acm_certificate_validation.cert[0].certificate_arn : null
+    ssl_support_method             = var.domain_name != null ? "sni-only" : null
+    minimum_protocol_version       = var.domain_name != null ? "TLSv1.2_2021" : "TLSv1"
+  }
+
   origin {
     domain_name = module.s3-bucket.s3_bucket_website_endpoint
     origin_id   = "S3-Website-Origin"
@@ -45,6 +55,14 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
       query_string = false
       cookies {
         forward = "none"
+      }
+    }
+
+    dynamic "function_association" {
+      for_each = var.domain_name != null ? [1] : []
+      content {
+        event_type   = "viewer-request"
+        function_arn = aws_cloudfront_function.redirect[0].arn
       }
     }
 
@@ -161,10 +179,6 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     }
   }
 
-  viewer_certificate {
-    cloudfront_default_certificate = true
-  }
-
   tags = {
     Name = "${var.project_name}-Distribution"
   }
@@ -205,4 +219,30 @@ resource "aws_cloudfront_key_group" "app_key_group" {
   lifecycle {
     ignore_changes = [items]
   }
+}
+
+resource "aws_cloudfront_function" "redirect" {
+  count   = var.domain_name != null ? 1 : 0
+  name    = "redirect-to-custom-domain"
+  runtime = "cloudfront-js-1.0"
+  publish = true
+
+  code = <<-EOF
+    function handler(event) {
+        var request = event.request;
+        var host = request.headers.host.value;
+        var customDomain = '${var.domain_name}';
+
+        if (host !== customDomain) {
+            return {
+                statusCode: 301,
+                statusDescription: 'Moved Permanently',
+                headers: {
+                    "location": { "value": "https://" + customDomain + request.uri }
+                }
+            };
+        }
+        return request;
+    }
+  EOF
 }

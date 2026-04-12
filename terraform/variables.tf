@@ -37,5 +37,11 @@ variable "budget_alert_emails" {
 variable "resizer_reserved_concurrency" {
   description = "Reserved concurrency limit for resizer Lambda (null for no limit)"
   type        = number
-  default     = 10
+  default     = null
+}
+
+variable "domain_name" {
+  type        = string
+  description = "Primary domain name (null for CloudFront default certificate only)"
+  default     = null
 }
