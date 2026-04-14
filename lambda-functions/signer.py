@@ -1,15 +1,23 @@
 import boto3
 import json
-import os
 import datetime
 import base64
+from config_helper import get_kms_key_id, get_cloudfront_key_id
 
 kms_client = boto3.client('kms')
 
+_CF_KEY_ID = None
+
+def get_cf_key_id():
+    global _CF_KEY_ID
+    if _CF_KEY_ID is None:
+        _CF_KEY_ID = get_cloudfront_key_id()
+    return _CF_KEY_ID
+
 def lambda_handler(event, context):
     try:
-        KMS_KEY_ARN = os.environ['KMS_KEY_ID']
-        CF_KEY_ID = os.environ['CLOUDFRONT_KEY_ID']
+        KMS_KEY_ARN = get_kms_key_id()
+        CF_KEY_ID = get_cf_key_id()
         
         headers = event.get('headers', {})
         cf_domain = headers.get('X-CloudFront-Domain') or headers.get('x-cloudfront-domain')

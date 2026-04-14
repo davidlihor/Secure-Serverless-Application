@@ -1,12 +1,18 @@
 import boto3
 import io
 import json
-import os
 from PIL import Image
+from config_helper import get_table_name
 
 s3 = boto3.client('s3')
 dynamodb = boto3.resource('dynamodb')
-table = dynamodb.Table(os.environ['TABLE_NAME'])
+_table = None
+
+def get_table():
+    global _table
+    if _table is None:
+        _table = dynamodb.Table(get_table_name())
+    return _table
 
 def lambda_handler(event, context):
     try:
@@ -60,7 +66,7 @@ def lambda_handler(event, context):
             )
 
         print(f"Updating DynamoDB for Task {task_id}...")
-        table.update_item(
+        get_table().update_item(
             Key={
                 'userId': user_id,
                 'taskId': task_id

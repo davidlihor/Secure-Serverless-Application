@@ -1,13 +1,24 @@
 import json
 import boto3
-import os
 from botocore.exceptions import ClientError
+from config_helper import get_table_name, get_bucket_name
 
 s3 = boto3.client('s3')
 dynamodb = boto3.resource('dynamodb')
-table = dynamodb.Table(os.environ['TABLE_NAME'])
+_table = None
+_bucket_name = None
 
-BUCKET_NAME = os.environ['BUCKET_NAME']
+def get_table():
+    global _table
+    if _table is None:
+        _table = dynamodb.Table(get_table_name())
+    return _table
+
+def get_bucket():
+    global _bucket_name
+    if _bucket_name is None:
+        _bucket_name = get_bucket_name()
+    return _bucket_name
 
 def lambda_handler(event, context):
     action = event.get('action')
@@ -32,7 +43,7 @@ def lambda_handler(event, context):
 
 def delete_dynamodb(user_id, task_id):
     try:
-        response = table.delete_item(
+        response = get_table().delete_item(
             Key={
                 'userId': user_id,
                 'taskId': task_id
@@ -67,7 +78,7 @@ def delete_s3_objects(user_id, task_id):
     for filename in files_to_delete:
         key = f"{prefix}{filename}"
         try:
-            s3.delete_object(Bucket=BUCKET_NAME, Key=key)
+            s3.delete_object(Bucket=get_bucket(), Key=key)
             deleted.append(key)
             print(f"S3 delete success: {key}")
         except ClientError as e:

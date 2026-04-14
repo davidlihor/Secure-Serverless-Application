@@ -2,11 +2,16 @@ import json
 import boto3
 import uuid
 from datetime import datetime
-import os
+from config_helper import get_table_name
 
 dynamodb = boto3.resource('dynamodb')
-table_name = os.environ.get('TABLE_NAME', 'CloudTaskTable')
-table = dynamodb.Table(table_name)
+_table = None
+
+def get_table():
+    global _table
+    if _table is None:
+        _table = dynamodb.Table(get_table_name())
+    return _table
 
 def lambda_handler(event, context):
     try:
@@ -30,7 +35,7 @@ def lambda_handler(event, context):
             'completed': False,
             'createdAt': datetime.now().isoformat()
         }
-        table.put_item(Item=item)
+        get_table().put_item(Item=item)
         
         return {
             'statusCode': 200,

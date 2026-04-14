@@ -1,4 +1,6 @@
 locals {
+  secrets_extension_arn = "arn:aws:lambda:${var.region}:177933569100:layer:AWS-Parameters-and-Secrets-Lambda-Extension:12"
+
   lambda_configs = {
     "create_task"    = { timeout = 3, memory = 128, needs_s3_write = false, needs_dynamo = true }
     "get_tasks"      = { timeout = 3, memory = 128, needs_s3_write = false, needs_dynamo = true }

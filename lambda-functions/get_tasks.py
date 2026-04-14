@@ -1,17 +1,22 @@
 import json
 import boto3
 from boto3.dynamodb.conditions import Key
-import os
+from config_helper import get_table_name
 
 dynamodb = boto3.resource('dynamodb')
-table_name = os.environ.get('TABLE_NAME', 'CloudTaskTable')
-table = dynamodb.Table(table_name)
+_table = None
+
+def get_table():
+    global _table
+    if _table is None:
+        _table = dynamodb.Table(get_table_name())
+    return _table
 
 def lambda_handler(event, context):
     try:
         user_id = event['requestContext']['authorizer']['claims']['sub']
 
-        response = table.query(
+        response = get_table().query(
             KeyConditionExpression=Key('userId').eq(user_id),
             ScanIndexForward=False
         )

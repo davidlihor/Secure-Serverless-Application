@@ -1,11 +1,17 @@
 import boto3
-import os
 import json
 from botocore.config import Config
+from config_helper import get_table_name, get_bucket_name
 
 dynamodb = boto3.resource('dynamodb')
-table = dynamodb.Table(os.environ['TABLE_NAME'])
+_table = None
 s3_client = boto3.client('s3', config=Config(signature_version='s3v4'))
+
+def get_table():
+    global _table
+    if _table is None:
+        _table = dynamodb.Table(get_table_name())
+    return _table
 
 def lambda_handler(event, context):
     user_id = event['requestContext']['authorizer']['claims']['sub']
@@ -17,7 +23,7 @@ def lambda_handler(event, context):
     if not task_id:
         return {'statusCode': 400, 'body': json.dumps({'error': 'taskId is required'})}
 
-    response = table.get_item(Key={
+    response = get_table().get_item(Key={
         'userId': user_id, 
         'taskId': task_id
     })
@@ -34,7 +40,7 @@ def lambda_handler(event, context):
     upload_url = s3_client.generate_presigned_url(
         ClientMethod='put_object',
         Params={
-            'Bucket': os.environ['BUCKET_NAME'],
+            'Bucket': get_bucket_name(),
             'Key': file_key,
             'ContentType': f'image/{file_ext}'
         },

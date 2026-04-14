@@ -1,9 +1,15 @@
 import json
 import boto3
-import os
+from config_helper import get_delete_queue_url
 
 sqs = boto3.client('sqs')
-QUEUE_URL = os.environ.get('DELETE_QUEUE_URL')
+_queue_url = None
+
+def get_queue_url():
+    global _queue_url
+    if _queue_url is None:
+        _queue_url = get_delete_queue_url()
+    return _queue_url
 
 def lambda_handler(event, context):
     try:
@@ -18,7 +24,7 @@ def lambda_handler(event, context):
         }
 
         response = sqs.send_message(
-            QueueUrl=QUEUE_URL,
+            QueueUrl=get_queue_url(),
             MessageBody=json.dumps(message),
             MessageAttributes={
                 'taskId': {
