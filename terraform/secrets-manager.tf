@@ -11,7 +11,7 @@ resource "aws_secretsmanager_secret" "cloudfront_key_id" {
 }
 
 resource "aws_secretsmanager_secret_version" "cloudfront_key_id" {
-  secret_id     = aws_secretsmanager_secret.cloudfront_key_id.id
+  secret_id = aws_secretsmanager_secret.cloudfront_key_id.id
   secret_string = jsonencode({
     key_id = aws_cloudfront_public_key.app_key.id
   })

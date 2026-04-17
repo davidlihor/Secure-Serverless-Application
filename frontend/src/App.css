@@ -1053,3 +1053,311 @@ html {
     background: rgba(255, 107, 53, 0.3);
     transform: scale(1.1);
 }
+
+/* Task Item - mapped from Tailwind classes */
+.task-item-modern {
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.task-item-modern:hover {
+    border-color: rgba(255, 107, 53, 0.3);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow);
+}
+
+.task-item-modern.completed {
+    opacity: 0.7;
+}
+
+.task-row-modern {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.task-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.task-title {
+    font-size: 1rem;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+    transition: all 0.3s;
+}
+
+.task-item-modern.completed .task-title {
+    text-decoration: line-through;
+    color: var(--text-muted);
+}
+
+.task-meta {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.task-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.task-btn {
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.task-btn:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--accent-primary);
+    color: var(--text-primary);
+}
+
+.task-btn.upload {
+    background: var(--accent-primary);
+    border-color: transparent;
+    color: white;
+}
+
+.task-btn.upload:hover {
+    background: var(--accent-secondary);
+}
+
+.task-btn.delete {
+    border-color: var(--danger-color);
+    color: var(--danger-color);
+}
+
+.task-btn.delete:hover {
+    background: var(--danger-color);
+    color: white;
+}
+
+.task-image-thumb {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 1px solid var(--glass-border);
+    transition: all 0.3s;
+}
+
+.task-image-thumb:hover {
+    border-color: var(--accent-primary);
+    box-shadow: var(--shadow-glow);
+}
+
+.task-image-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.upload-progress {
+    font-size: 0.75rem;
+    color: var(--accent-primary);
+}
+
+/* Task Item - Additional classes */
+.task-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.task-title {
+    font-size: 1.05rem;
+    color: var(--text-primary);
+    flex: 1;
+    transition: all 0.3s;
+}
+
+.task-title.completed {
+    text-decoration: line-through;
+    color: var(--text-muted);
+    opacity: 0.6;
+}
+
+.task-actions-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+/* Custom Checkbox */
+.task-checkbox-wrapper {
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.task-checkbox-wrapper input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.checkmark {
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 2px solid var(--glass-border);
+    border-radius: 6px;
+    background: var(--bg-input);
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.task-checkbox-wrapper input[type="checkbox"]:checked + .checkmark {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+}
+
+.task-checkbox-wrapper input[type="checkbox"]:checked + .checkmark::after {
+    content: '✓';
+    color: white;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.task-upload-btn {
+    cursor: pointer;
+}
+
+.task-upload-btn input[type="file"] {
+    display: none;
+}
+
+.task-upload-btn span {
+    display: inline-block;
+    padding: 0.4rem 0.75rem;
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    border-radius: 6px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    transition: all 0.3s;
+}
+
+.task-upload-btn:hover span {
+    background: var(--accent-primary);
+    border-color: transparent;
+    color: white;
+}
+
+.task-delete-btn {
+    padding: 0.4rem 0.75rem;
+    background: transparent;
+    border: 1px solid var(--danger-color);
+    border-radius: 6px;
+    font-size: 0.8rem;
+    color: var(--danger-color);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.task-delete-btn:hover:not(:disabled) {
+    background: var(--danger-color);
+    color: white;
+}
+
+.task-delete-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.checkbox-hidden {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* Task Form */
+.add-task {
+    margin-bottom: 1.5rem;
+}
+
+.add-task form {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.input-field {
+    flex: 1;
+    background: var(--bg-input);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: var(--shadow-glow);
+}
+
+.input-field::placeholder {
+    color: var(--text-muted);
+}
+
+/* Task Filters */
+.task-filters {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.875rem;
+}
+
+.filter-btn:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--accent-primary);
+    color: var(--text-primary);
+}
+
+.filter-btn.active {
+    background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+    border-color: transparent;
+    color: white;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-muted);
+}

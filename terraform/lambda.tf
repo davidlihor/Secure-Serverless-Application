@@ -17,13 +17,13 @@ resource "aws_lambda_function" "cloudstack_lambdas" {
   role          = aws_iam_role.lambda_roles[each.key].arn
   handler       = "${each.key}.lambda_handler"
   runtime       = "python3.12"
-  architectures   = ["x86_64"]
+  architectures = ["x86_64"]
 
   memory_size = each.value.memory
   timeout     = each.value.timeout
 
   reserved_concurrent_executions = each.key == "resizer" && var.is_production ? var.resizer_reserved_concurrency : null
-  
+
   layers = compact([
     local.secrets_extension_arn,
     each.key == "resizer" ? "arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p312-Pillow:10" : null
@@ -40,14 +40,14 @@ resource "aws_lambda_function" "cloudstack_lambdas" {
   environment {
     variables = merge({
       PARAMETERS_SECRETS_EXTENSION_CACHE_ENABLED = "true"
-      PARAMETERS_SECRETS_EXTENSION_CACHE_SIZE  = "100"
-      SSM_PARAMETER_STORE_TTL                  = "300"
+      PARAMETERS_SECRETS_EXTENSION_CACHE_SIZE    = "100"
+      SSM_PARAMETER_STORE_TTL                    = "300"
       SECRETS_MANAGER_TTL                        = "300"
       PARAMETERS_SECRETS_EXTENSION_LOG_LEVEL     = "INFO"
 
-      SSM_PARAMETER_PREFIX = "/${var.project_name}/${var.environment}"
+      SSM_PARAMETER_PREFIX  = "/${var.project_name}/${var.environment}"
       SECRET_ARN_CLOUDFRONT = aws_secretsmanager_secret.cloudfront_key_id.arn
-    }, each.key == "delete_task" ? {
+      }, each.key == "delete_task" ? {
       DELETE_QUEUE_URL_PARAM = "/${var.project_name}/${var.environment}/sqs/delete-queue-url"
     } : {})
   }

@@ -18,9 +18,9 @@ module "vpc" {
   enable_dns_support      = true
   map_public_ip_on_launch = false
 
-  enable_flow_log                                = true
-  create_flow_log_cloudwatch_iam_role            = true
-  create_flow_log_cloudwatch_log_group           = true
+  enable_flow_log                                 = true
+  create_flow_log_cloudwatch_iam_role             = true
+  create_flow_log_cloudwatch_log_group            = true
   flow_log_cloudwatch_log_group_retention_in_days = 30
 
   create_database_subnet_group       = true
