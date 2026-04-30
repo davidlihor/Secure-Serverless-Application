@@ -23,15 +23,3 @@ variable "domain_name" {
   type        = string
   default     = null
 }
-
-variable "cloudfront_domain_name" {
-  description = "CloudFront distribution domain name for Route53 alias"
-  type        = string
-  default     = ""
-}
-
-variable "cloudfront_hosted_zone_id" {
-  description = "CloudFront hosted zone ID (fixed: Z2FDTNDATAQYW2)"
-  type        = string
-  default     = "Z2FDTNDATAQYW2"
-}
