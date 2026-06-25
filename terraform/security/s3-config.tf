@@ -1,6 +1,6 @@
 module "s3_config_logs" {
   source  = "terraform-aws-modules/s3-bucket/aws"
-  version = "5.13.0"
+  version = "5.14.0"
 
   bucket           = var.bucket_config_name
   bucket_namespace = "account-regional"
