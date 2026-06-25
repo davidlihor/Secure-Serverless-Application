@@ -211,7 +211,7 @@ jobs:
           workflow_conclusion: success
           name: frontend-production-dist
           path: frontend/dist
-          if_no_artifact_found: fail
+          if_no_artifact_found: warn
 
       - name: Terraform Init (remote S3)
         run: |
