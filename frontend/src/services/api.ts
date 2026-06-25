@@ -102,7 +102,7 @@ export const taskApi = {
 
   getCloudFrontImageUrl(taskId: string, userId: string, isThumbnail: boolean = false): string {
     const imageName = isThumbnail ? 'thumbnail.png' : 'photo.png';
-    return `https://${config.cloudFrontDomain}/users/${userId}/${taskId}/${imageName}`;
+    return `/users/${userId}/${taskId}/${imageName}`;
   },
 
   async uploadFile(uploadUrl: string, file: File, onProgress?: (progress: number) => void): Promise<void> {
