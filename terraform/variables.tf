@@ -13,13 +13,13 @@ variable "project_name" {
 variable "environment" {
   description = "Environment name (dev, staging, production)"
   type        = string
-  default     = "production"
+  default     = "dev"
 }
 
 variable "is_production" {
   description = "Flag to indicate production environment for cost optimization"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "monthly_budget_limit" {
