@@ -43,5 +43,5 @@ variable "resizer_reserved_concurrency" {
 variable "domain_name" {
   type        = string
   description = "Primary domain name (null for CloudFront default certificate only)"
-  default     = "aws.davidlihor.com"
+  default     = null
 }

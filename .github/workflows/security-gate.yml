@@ -18,25 +18,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Gitleaks
-        uses: ./.github/actions/setup-gitleaks
-        with:
-          version: "8.20.1"
-
-      - name: Run Gitleaks (Full Scan)
-        shell: bash
-        run: |
-          gitleaks detect \
-            --source . \
-            --report-format json \
-            --report-path gitleaks-report.json \
-            --exit-code 0 \
-            --no-git
-
-          if [ -f gitleaks-report.json ] && [ s$(cat gitleaks-report.json) != "s[]" ]; then
-            echo "❌ Gitleaks found potential leaks!"
-            cat gitleaks-report.json | jq '.[] | {RuleID, File, StartLine}'
-            exit 1
-          else
-            echo "✅ No leaks found"
-          fi
+      - name: Run Gitleaks Scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -71,7 +71,7 @@ def lambda_handler(event, context):
             },
             "headers": {
                 "Content-Type": "application/json",
-                "Access-Control-Allow-Origin": event.get('headers', {}).get('Origin', '*'),
+                "Access-Control-Allow-Origin": f"https://{cf_domain}",
                 "Access-Control-Allow-Credentials": "true"
             },
             "body": json.dumps({

@@ -164,11 +164,43 @@ jobs:
 
       - name: Post Plan to Pull Request
         if: github.event_name == 'pull_request'
-        uses: ./.github/actions/iac-plan-commenter
+        uses: actions/github-script@v7
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PLAN_FILE: 'terraform/plan.txt'
         with:
-          plan-file: 'terraform/plan.txt'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const planPath = process.env.PLAN_FILE;
+            
+            if (!fs.existsSync(planPath)) {
+              core.setFailed(`The plan file was not found at path: ${planPath}`);
+              return;
+            }
+
+            const plan = fs.readFileSync(planPath, 'utf8');
+            const maxLen = 60000;
+            const trimmedPlan = plan.length > maxLen ? plan.substring(0, maxLen) + '\n... (plan truncated due to size)' : plan;
+
+            const body = `
+            #### Terraform Plan Output for \`${context.payload.pull_request.head.ref}\`
+            <details><summary>Click here to see the plan details</summary>
+
+            \`\`\`hcl
+            ${trimmedPlan}
+            \`\`\`
+
+            </details>
+
+            *Pusher: @${context.actor}, Action: \`${context.eventName}\`*
+            `.replace(/^ +/gm, '').trim();
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: body
+            });
 
       - name: Upload Plan as Artifact
         if: ${{ steps.plan.outcome == 'success' }}

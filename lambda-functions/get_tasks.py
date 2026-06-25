@@ -25,7 +25,7 @@ def lambda_handler(event, context):
         
         return {
             'statusCode': 200,
-            'headers': get_cors_headers(),
+                'headers': get_cors_headers(event),
             'body': json.dumps(tasks)
         }
         
@@ -33,20 +33,23 @@ def lambda_handler(event, context):
         print(f"Missing key: {e}")
         return {
             'statusCode': 401,
-            'headers': get_cors_headers(),
+                'headers': get_cors_headers(event),
             'body': json.dumps({'error': 'Unauthorized - Invalid token'})
         }
     except Exception as e:
         print(f"Error: {str(e)}")
         return {
             'statusCode': 500,
-            'headers': get_cors_headers(),
+                'headers': get_cors_headers(event),
             'body': json.dumps({'error': 'Internal server error'})
         }
 
-def get_cors_headers():
+def get_cors_headers(event=None):
+    headers = event.get('headers', {}) if event else {}
+    origin = headers.get('origin') or headers.get('Origin') or '*'
     return {
-        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Origin': origin,
         'Access-Control-Allow-Headers': 'Content-Type,Authorization,X-CloudFront-Domain,x-cloudfront-domain',
-        'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
+        'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE',
+        'Access-Control-Allow-Credentials': 'true'
     }

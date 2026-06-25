@@ -31,7 +31,7 @@ def lambda_handler(event, context):
     if 'Item' not in response:
         return {
             'statusCode': 404,
-            'headers': get_cors_headers(),
+            'headers': get_cors_headers(event),
             'body': json.dumps({'error': 'Task not found or unauthorized'})
         }
 
@@ -49,16 +49,19 @@ def lambda_handler(event, context):
 
     return {
         "statusCode": 200,
-        "headers": get_cors_headers(),
+        "headers": get_cors_headers(event),
         "body": json.dumps({
             "uploadURL": upload_url,
             "imageKey": file_key
         })
     }
 
-def get_cors_headers():
+def get_cors_headers(event=None):
+    headers = event.get('headers', {}) if event else {}
+    origin = headers.get('origin') or headers.get('Origin') or '*'
     return {
-        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Origin': origin,
         'Access-Control-Allow-Headers': 'Content-Type,Authorization,X-CloudFront-Domain,x-cloudfront-domain',
-        'Access-Control-Allow-Methods': 'POST,OPTIONS'
+        'Access-Control-Allow-Methods': 'POST,OPTIONS',
+        'Access-Control-Allow-Credentials': 'true'
     }
