@@ -2,7 +2,7 @@ import type { Task } from '../types';
 import { config } from './config';
 import { AuthService } from './auth';
 
-const API_BASE = config.apiEndpoint;
+const API_BASE = '';
 
 class ApiError extends Error {
   constructor(message: string) {
@@ -102,7 +102,7 @@ export const taskApi = {
 
   getCloudFrontImageUrl(taskId: string, userId: string, isThumbnail: boolean = false): string {
     const imageName = isThumbnail ? 'thumbnail.png' : 'photo.png';
-    return `/users/${userId}/${taskId}/${imageName}`;
+    return `https://${config.cloudFrontDomain}/users/${userId}/${taskId}/${imageName}`;
   },
 
   async uploadFile(uploadUrl: string, file: File, onProgress?: (progress: number) => void): Promise<void> {
