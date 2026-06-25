@@ -6,8 +6,18 @@ interface AWSConfig {
   region: string;
 }
 
+interface CustomWindow extends Window {
+  AWS_CONFIG?: {
+    apiEndpoint?: string;
+    cognitoUserPoolId?: string;
+    cognitoClientId?: string;
+    cloudFrontDomain?: string;
+    region?: string;
+  };
+}
+
 export const getConfig = (): AWSConfig => {
-  const windowConfig = (window as any).AWS_CONFIG;
+  const windowConfig = (window as unknown as CustomWindow).AWS_CONFIG;
   
   return {
     apiEndpoint: windowConfig?.apiEndpoint || import.meta.env.VITE_API_ENDPOINT || '',

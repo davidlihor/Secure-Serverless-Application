@@ -20,11 +20,13 @@ export function TaskItem({
   onUpload,
 }: TaskItemProps) {
   const fileContext = useFileContext();
-  const [displayUrl, setDisplayUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const userId = AuthService.getCurrentUser()?.getUsername();
 
   const localBlobUrl = fileContext.blobs[task.taskId]?.blobUrl;
+  const cacheKey = `${task.taskId}-thumb`;
+  const cachedUrl = fileContext.imageCache[cacheKey];
+  const displayUrl = localBlobUrl || cachedUrl || null;
 
   const uploadProgress = fileContext.uploadProgress[task.taskId];
   const isUploading = uploadProgress !== undefined && uploadProgress < 100;
@@ -38,22 +40,17 @@ export function TaskItem({
   useEffect(() => {
     if (!userId) return;
 
-    const cacheKey = `${task.taskId}-thumb`;
-
-    if (localBlobUrl) {
-      setDisplayUrl(localBlobUrl);
-      return;
-    }
-
+    if (localBlobUrl) return;
     if (!task.hasImage) return;
 
-    const cachedUrl = fileContext.imageCache[cacheKey];
-    if (cachedUrl) {
-      setDisplayUrl(cachedUrl);
-      return;
-    }
+    if (cachedUrl) return;
 
-    setIsLoading(true);
+    let active = true;
+
+    Promise.resolve().then(() => {
+      if (active) setIsLoading(true);
+    });
+
     const thumbUrl = taskApi.getCloudFrontImageUrl(task.taskId, userId, true);
 
     fetch(thumbUrl, { credentials: 'include' })
@@ -62,21 +59,21 @@ export function TaskItem({
         return res.blob();
       })
       .then(blob => {
+        if (!active) return;
         const objectUrl = URL.createObjectURL(blob);
         fileContext.setCachedImage(cacheKey, objectUrl);
-        setDisplayUrl(objectUrl);
       })
       .catch(() => {
-        setDisplayUrl(null);
+        // No-op or handle error
       })
       .finally(() => {
-        setIsLoading(false);
+        if (active) setIsLoading(false);
       });
 
     return () => {
-      setIsLoading(false);
+      active = false;
     };
-  }, [task.hasImage, task.taskId, userId, localBlobUrl, fileContext]);
+  }, [task.hasImage, task.taskId, userId, localBlobUrl, fileContext, cacheKey, cachedUrl]);
 
   const handleFileSelect = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {

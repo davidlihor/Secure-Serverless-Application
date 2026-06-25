@@ -25,7 +25,7 @@ export class AuthService {
     if (!user) return null;
     
     let token: string | null = null;
-    user.getSession((err: any, session: CognitoUserSession) => {
+    user.getSession((err: Error | null, session: CognitoUserSession) => {
       if (!err && session) {
         token = session.getIdToken().getJwtToken();
       }
@@ -46,7 +46,7 @@ export class AuthService {
         return;
       }
 
-      user.getSession((err: any, session: CognitoUserSession) => {
+      user.getSession((err: Error | null, session: CognitoUserSession) => {
         if (!err && session) {
           const payload = session.getIdToken().decodePayload();
           resolve(payload.email || user.getUsername() || '');

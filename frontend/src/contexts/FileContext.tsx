@@ -39,8 +39,9 @@ export function FileProvider({ children }: { children: React.ReactNode }) {
       URL.revokeObjectURL(entry.blobUrl);
     }
     setBlobs(prev => {
-      const { [taskId]: _, ...rest } = prev;
-      return rest;
+      const next = { ...prev };
+      delete next[taskId];
+      return next;
     });
   }, [blobs]);
 
@@ -76,6 +77,7 @@ export function FileProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useFileContext() {
   const context = useContext(FileContext);
   if (!context) {
