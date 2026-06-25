@@ -3,6 +3,11 @@ output "app_url" {
   value       = var.domain_name != null ? "https://${var.domain_name}" : "https://${module.frontend.cloudfront_distribution_domain_name}"
 }
 
+output "frontend_bucket_id" {
+  description = "ID of the S3 bucket hosting the frontend"
+  value       = module.frontend.s3_bucket_id
+}
+
 output "s3_website_url" {
   description = "S3 bucket website endpoint URL"
   value       = module.frontend.s3_bucket_website_endpoint

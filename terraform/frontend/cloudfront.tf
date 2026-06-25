@@ -134,21 +134,6 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   }
 }
 
-resource "null_resource" "cloudfront_invalidation" {
-  triggers = {
-    frontend_hash = sha256(join("", [
-      for f in fileset("${path.module}/../../frontend/dist", "**") : filemd5("${path.module}/../../frontend/dist/${f}")
-    ]))
-    config_hash = md5(aws_s3_object.config_js.content)
-  }
-
-  provisioner "local-exec" {
-    command = "aws cloudfront create-invalidation --distribution-id ${aws_cloudfront_distribution.s3_distribution.id} --paths '/*'"
-  }
-
-  depends_on = [aws_s3_object.frontend_files, aws_s3_object.config_js]
-}
-
 resource "aws_cloudfront_public_key" "app_key" {
   name        = "user-photos-key"
   encoded_key = <<-EOF
