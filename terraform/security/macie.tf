@@ -6,7 +6,7 @@ resource "aws_macie2_account" "main" {
 resource "aws_macie2_classification_job" "data_bucket_scan" {
   job_type = "SCHEDULED"
   name     = "Scan-Targeted-Data-Bucket"
-  
+
   s3_job_definition {
     bucket_definitions {
       account_id = data.aws_caller_identity.current.account_id

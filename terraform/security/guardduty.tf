@@ -66,7 +66,7 @@ resource "aws_iam_role" "guardduty_malware_scan_role" {
     Statement = [{
       Action = "sts:AssumeRole"
       Effect = "Allow"
-      Principal = { 
+      Principal = {
         Service = "malware-protection-plan.guardduty.amazonaws.com"
       }
     }]
@@ -115,21 +115,21 @@ resource "aws_iam_role_policy" "guardduty_malware_full_access" {
         Action = [
           "s3:PutBucketNotification",
           "s3:GetBucketNotification",
-          "s3:GetBucketLocation", 
-          "s3:ListBucket"         
+          "s3:GetBucketLocation",
+          "s3:ListBucket"
         ]
         Resource = [var.s3_data_bucket_arn]
       },
       {
-        Sid    = "AllowPutValidationObject"
-        Effect = "Allow"
-        Action = ["s3:PutObject"]
+        Sid      = "AllowPutValidationObject"
+        Effect   = "Allow"
+        Action   = ["s3:PutObject"]
         Resource = ["${var.s3_data_bucket_arn}/malware-protection-resource-validation-object"]
       },
       {
-        Sid    = "AllowScanObject"
-        Effect = "Allow"
-        Action = ["s3:GetObject", "s3:GetObjectVersion"]
+        Sid      = "AllowScanObject"
+        Effect   = "Allow"
+        Action   = ["s3:GetObject", "s3:GetObjectVersion"]
         Resource = ["${var.s3_data_bucket_arn}/*"]
       }
     ]

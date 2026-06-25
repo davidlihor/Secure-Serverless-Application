@@ -2,9 +2,9 @@ module "s3_data" {
   source  = "terraform-aws-modules/s3-bucket/aws"
   version = "5.13.0"
 
-  bucket        = var.bucket_data
+  bucket           = var.bucket_data
   bucket_namespace = "account-regional"
-  force_destroy = !var.is_production
+  force_destroy    = !var.is_production
 
   block_public_acls       = true
   block_public_policy     = true
@@ -54,14 +54,14 @@ resource "aws_s3_bucket_policy" "allow_access_from_cloudfront" {
         Principal = {
           Service = "cloudfront.amazonaws.com"
         }
-        Action   = [
+        Action = [
           "s3:GetObject",
           "s3:GetObjectTagging"
         ],
         Resource = "${module.s3_data.s3_bucket_arn}/*"
         Condition = {
           StringEquals = {
-            "AWS:SourceArn" = var.cloudfront_distribution_arn,
+            "AWS:SourceArn"                                   = var.cloudfront_distribution_arn,
             "s3:ExistingObjectTag/GuardDutyMalwareScanStatus" = "NO_THREATS_FOUND"
           }
         }
