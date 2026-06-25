@@ -1,4 +1,5 @@
 resource "aws_ssm_parameter" "table_name" {
+  # checkov:skip=CKV2_AWS_34:DynamoDB table name is structural metadata and does not contain sensitive data
   name  = "/${var.project_name}/${var.environment}/dynamodb/table-name"
   type  = "String"
   value = var.dynamodb_table_name
@@ -10,6 +11,7 @@ resource "aws_ssm_parameter" "table_name" {
 }
 
 resource "aws_ssm_parameter" "bucket_name" {
+  # checkov:skip=CKV2_AWS_34:S3 bucket name is non-sensitive configuration data
   name  = "/${var.project_name}/${var.environment}/s3/data-bucket"
   type  = "String"
   value = var.s3_data_bucket_id
@@ -33,6 +35,7 @@ resource "aws_ssm_parameter" "kms_key_id" {
 }
 
 resource "aws_ssm_parameter" "delete_queue_url" {
+  # checkov:skip=CKV2_AWS_34:SQS queue URL is environment infrastructure data, not a secret
   name  = "/${var.project_name}/${var.environment}/sqs/delete-queue-url"
   type  = "String"
   value = aws_sqs_queue.task_deletion_queue.id
@@ -44,6 +47,7 @@ resource "aws_ssm_parameter" "delete_queue_url" {
 }
 
 resource "aws_ssm_parameter" "config_prefix" {
+  # checkov:skip=CKV2_AWS_34:Configuration prefix path is plain text and does not require encryption
   name  = "/${var.project_name}/${var.environment}/config/prefix"
   type  = "String"
   value = "/${var.project_name}/${var.environment}"
