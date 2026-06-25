@@ -108,4 +108,3 @@ def get_delete_queue_url():
     if not param_path:
         param_path = CONFIG_PATHS['delete_queue_url']
     return LambdaConfig.get('delete_queue_url', param_path=param_path)
-

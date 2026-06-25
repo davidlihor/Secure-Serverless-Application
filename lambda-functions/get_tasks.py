@@ -56,4 +56,3 @@ def get_cors_headers(event=None):
         'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE',
         'Access-Control-Allow-Credentials': 'true'
     }
-

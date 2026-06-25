@@ -128,4 +128,3 @@ def log_failure(event, aws_request_id=None):
         'action': 'log_failure',
         'error': error
     }
-
