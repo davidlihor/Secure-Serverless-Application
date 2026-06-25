@@ -28,6 +28,11 @@ resource "aws_macie2_classification_export_configuration" "main" {
     key_prefix  = "macie-results/"
     kms_key_arn = aws_kms_key.macie_key.arn
   }
+
+  depends_on = [
+    aws_s3_bucket_policy.s3_config_logs_policy,
+    aws_kms_key.macie_key
+  ]
 }
 
 resource "null_resource" "macie_disable_automated_discovery" {

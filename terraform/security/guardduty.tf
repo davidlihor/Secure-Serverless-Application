@@ -56,6 +56,10 @@ resource "aws_guardduty_malware_protection_plan" "s3_data_scan" {
       status = "ENABLED"
     }
   }
+
+  depends_on = [
+    aws_iam_role_policy.guardduty_malware_full_access
+  ]
 }
 
 resource "aws_iam_role" "guardduty_malware_scan_role" {

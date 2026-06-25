@@ -8,8 +8,11 @@ module "s3_config_logs" {
 
   control_object_ownership = true
   object_ownership         = "BucketOwnerPreferred"
+}
 
-  attach_policy = true
+resource "aws_s3_bucket_policy" "s3_config_logs_policy" {
+  bucket = module.s3_config_logs.s3_bucket_id
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -20,7 +23,7 @@ module "s3_config_logs" {
           Service = "config.amazonaws.com"
         }
         Action   = "s3:PutObject"
-        Resource = "arn:aws:s3:::${var.bucket_config_name}/AWSLogs/*"
+        Resource = "${module.s3_config_logs.s3_bucket_arn}/AWSLogs/*"
         Condition = {
           StringEquals = {
             "s3:x-amz-acl" = "bucket-owner-full-control"
@@ -37,14 +40,14 @@ module "s3_config_logs" {
           "s3:GetBucketAcl",
           "s3:ListBucket"
         ]
-        Resource = "arn:aws:s3:::${var.bucket_config_name}"
+        Resource = module.s3_config_logs.s3_bucket_arn
       },
       {
         Sid       = "AllowMacieExport"
         Effect    = "Allow"
         Principal = { Service = "macie.amazonaws.com" }
         Action    = "s3:PutObject"
-        Resource  = "arn:aws:s3:::${var.bucket_config_name}/macie-results/*"
+        Resource  = "${module.s3_config_logs.s3_bucket_arn}/macie-results/*"
         Condition = {
           StringEquals = {
             "aws:SourceAccount" = data.aws_caller_identity.current.account_id
@@ -56,7 +59,7 @@ module "s3_config_logs" {
         Effect    = "Allow"
         Principal = { Service = "macie.amazonaws.com" }
         Action    = "s3:GetBucketLocation"
-        Resource  = "arn:aws:s3:::${var.bucket_config_name}"
+        Resource  = module.s3_config_logs.s3_bucket_arn
       }
     ]
   })
