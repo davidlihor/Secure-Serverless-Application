@@ -61,6 +61,6 @@ def lambda_handler(event, context):
 def get_cors_headers():
     return {
         'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+        'Access-Control-Allow-Headers': 'Content-Type,Authorization,X-CloudFront-Domain,x-cloudfront-domain',
         'Access-Control-Allow-Methods': 'OPTIONS,POST,GET,PUT,DELETE'
     }

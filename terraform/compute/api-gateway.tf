@@ -133,7 +133,7 @@ resource "aws_api_gateway_integration_response" "options_int_resp" {
   status_code = aws_api_gateway_method_response.options_200[each.key].status_code
 
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers"     = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "method.response.header.Access-Control-Allow-Headers"     = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-CloudFront-Domain,x-cloudfront-domain'"
     "method.response.header.Access-Control-Allow-Methods"     = "'DELETE,GET,OPTIONS,POST,PUT'"
     "method.response.header.Access-Control-Allow-Origin"      = var.domain_name != null ? "'https://${var.domain_name}'" : "'https://${var.cloudfront_domain_name}'"
     "method.response.header.Access-Control-Expose-Headers"    = "'Set-Cookie'"
