@@ -7,15 +7,17 @@ dynamodb = boto3.resource('dynamodb')
 _table = None
 s3_client = boto3.client('s3', config=Config(signature_version='s3v4'))
 
+
 def get_table():
     global _table
     if _table is None:
         _table = dynamodb.Table(get_table_name())
     return _table
 
+
 def lambda_handler(event, context):
     user_id = event['requestContext']['authorizer']['claims']['sub']
-    
+
     body = json.loads(event.get('body', '{}'))
     task_id = body.get('taskId')
     file_ext = body.get('extension', 'png').replace('.', '')
@@ -24,7 +26,7 @@ def lambda_handler(event, context):
         return {'statusCode': 400, 'body': json.dumps({'error': 'taskId is required'})}
 
     response = get_table().get_item(Key={
-        'userId': user_id, 
+        'userId': user_id,
         'taskId': task_id
     })
 
@@ -36,7 +38,7 @@ def lambda_handler(event, context):
         }
 
     file_key = f"users/{user_id}/{task_id}/photo.{file_ext}"
-    
+
     upload_url = s3_client.generate_presigned_url(
         ClientMethod='put_object',
         Params={
@@ -56,6 +58,7 @@ def lambda_handler(event, context):
         })
     }
 
+
 def get_cors_headers(event=None):
     headers = event.get('headers', {}) if event else {}
     origin = headers.get('origin') or headers.get('Origin') or '*'
@@ -65,3 +68,4 @@ def get_cors_headers(event=None):
         'Access-Control-Allow-Methods': 'POST,OPTIONS',
         'Access-Control-Allow-Credentials': 'true'
     }
+

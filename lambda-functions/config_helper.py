@@ -12,7 +12,7 @@ _PARAMETER_PREFIX = os.environ.get('SSM_PARAMETER_PREFIX', '')
 def get_parameter(param_name, with_decryption=False):
     if not param_name.startswith('/'):
         param_name = f"{_PARAMETER_PREFIX}/{param_name}"
-    
+
     url = f"http://localhost:{_EXTENSION_PORT}/systemsmanager/parameters/get/?name={param_name}"
     if with_decryption:
         url += "&withDecryption=true"
@@ -21,7 +21,7 @@ def get_parameter(param_name, with_decryption=False):
         response = _http.request("GET", url, headers=headers, timeout=5.0)
         if response.status != 200:
             raise Exception(f"Failed to get parameter: {response.status} {response.data}")
-        
+
         data = json.loads(response.data)
         return data['Parameter']['Value']
     except Exception as e:
@@ -35,7 +35,7 @@ def get_secret(secret_arn):
         response = _http.request("GET", url, headers=headers, timeout=5.0)
         if response.status != 200:
             raise Exception(f"Failed to get secret: {response.status} {response.data}")
-        
+
         data = json.loads(response.data)
         secret_string = data['SecretString']
         try:
@@ -48,12 +48,12 @@ def get_secret(secret_arn):
 
 class LambdaConfig:
     _cache = {}
-    
+
     @classmethod
     def get(cls, key, param_path=None, secret_arn=None, default=None):
         if key in cls._cache:
             return cls._cache[key]
-        
+
         value = default
         try:
             if param_path:
@@ -64,10 +64,10 @@ class LambdaConfig:
             if default is None:
                 raise e
             print(f"Warning: Could not retrieve {key}, using default: {e}")
-        
+
         cls._cache[key] = value
         return value
-    
+
     @classmethod
     def clear_cache(cls):
         cls._cache = {}
@@ -108,3 +108,4 @@ def get_delete_queue_url():
     if not param_path:
         param_path = CONFIG_PATHS['delete_queue_url']
     return LambdaConfig.get('delete_queue_url', param_path=param_path)
+

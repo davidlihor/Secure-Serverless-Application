@@ -8,11 +8,13 @@ s3 = boto3.client('s3')
 dynamodb = boto3.resource('dynamodb')
 _table = None
 
+
 def get_table():
     global _table
     if _table is None:
         _table = dynamodb.Table(get_table_name())
     return _table
+
 
 def lambda_handler(event, context):
     try:
@@ -26,8 +28,8 @@ def lambda_handler(event, context):
         if 'body' in data and isinstance(data['body'], str):
             data = json.loads(data['body'])
 
-        detail = data.get('detail', data) 
-        
+        detail = data.get('detail', data)
+
         bucket_name = detail.get('bucket', {}).get('name')
         object_key = detail.get('object', {}).get('key')
 
@@ -44,7 +46,7 @@ def lambda_handler(event, context):
             return {'statusCode': 200, 'body': f'Skipped {object_key}'}
 
         parts = object_key.strip('/').split('/')
-        user_id = parts[1] 
+        user_id = parts[1]
         task_id = parts[2]
 
         response = s3.get_object(Bucket=bucket_name, Key=object_key)
@@ -57,7 +59,7 @@ def lambda_handler(event, context):
             buffer.seek(0)
 
             new_key = object_key.replace('photo.png', 'thumbnail.png')
-            
+
             s3.put_object(
                 Bucket=bucket_name,
                 Key=new_key,
@@ -87,3 +89,4 @@ def lambda_handler(event, context):
     except Exception as e:
         print(f"Error: {str(e)}")
         raise e
+

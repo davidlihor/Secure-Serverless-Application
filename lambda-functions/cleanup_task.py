@@ -8,11 +8,13 @@ dynamodb = boto3.resource('dynamodb')
 _table = None
 _bucket_name = None
 
+
 def get_table():
     global _table
     if _table is None:
         _table = dynamodb.Table(get_table_name())
     return _table
+
 
 def get_bucket():
     global _bucket_name
@@ -20,13 +22,14 @@ def get_bucket():
         _bucket_name = get_bucket_name()
     return _bucket_name
 
+
 def lambda_handler(event, context):
     action = event.get('action')
     user_id = event.get('userId')
     task_id = event.get('taskId')
-    
+
     print(f"[{action}] Processing cleanup for user={user_id}, task={task_id}")
-    
+
     try:
         if action == 'delete_dynamodb':
             return delete_dynamodb(user_id, task_id)
@@ -36,10 +39,11 @@ def lambda_handler(event, context):
             return log_failure(event, context.aws_request_id)
         else:
             raise ValueError(f"Unknown action: {action}")
-            
+
     except Exception as e:
         print(f"Error in {action}: {str(e)}")
         raise e
+
 
 def delete_dynamodb(user_id, task_id):
     try:
@@ -50,12 +54,12 @@ def delete_dynamodb(user_id, task_id):
             },
             ReturnValues='ALL_OLD'
         )
-        
+
         deleted_item = response.get('Attributes', {})
         had_image = deleted_item.get('hasImage', False)
-        
+
         print(f"DynamoDB delete success: task={task_id}, hadImage={had_image}")
-        
+
         return {
             'statusCode': 200,
             'userId': user_id,
@@ -64,17 +68,18 @@ def delete_dynamodb(user_id, task_id):
             'hadImage': had_image,
             'deletedItem': deleted_item
         }
-        
+
     except ClientError as e:
         print(f"DynamoDB delete failed: {e.response['Error']['Code']}")
         raise e
+
 
 def delete_s3_objects(user_id, task_id):
     prefix = f"users/{user_id}/{task_id}/"
     files_to_delete = ['photo.png', 'thumbnail.png']
     deleted = []
     failed = []
-    
+
     for filename in files_to_delete:
         key = f"{prefix}{filename}"
         try:
@@ -87,10 +92,10 @@ def delete_s3_objects(user_id, task_id):
             else:
                 print(f"S3 delete failed for {key}: {e.response['Error']['Code']}")
                 failed.append({'key': key, 'error': e.response['Error']['Code']})
-    
+
     if failed:
         raise Exception(f"Failed to delete {len(failed)} S3 objects: {failed}")
-    
+
     return {
         'statusCode': 200,
         'userId': user_id,
@@ -99,11 +104,12 @@ def delete_s3_objects(user_id, task_id):
         'deletedFiles': deleted
     }
 
+
 def log_failure(event, aws_request_id=None):
     error = event.get('error', {})
     user_id = event.get('userId')
     task_id = event.get('taskId')
-    
+
     failure_log = {
         'level': 'ERROR',
         'message': 'Task cleanup failed',
@@ -112,9 +118,9 @@ def log_failure(event, aws_request_id=None):
         'error': error,
         'timestamp': aws_request_id or 'unknown'
     }
-    
+
     print(json.dumps(failure_log))
-    
+
     return {
         'statusCode': 500,
         'userId': user_id,
@@ -122,3 +128,4 @@ def log_failure(event, aws_request_id=None):
         'action': 'log_failure',
         'error': error
     }
+
