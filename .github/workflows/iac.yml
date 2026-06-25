@@ -227,10 +227,10 @@ jobs:
 
       - name: Extract Terraform Outputs
         run: |
-          echo "API_GATEWAY_URL=$(terraform output -raw api_gateway_url)" >> $GITHUB_ENV
+          echo "API_GATEWAY_URL=$(terraform output -raw config_api_endpoint)" >> $GITHUB_ENV
           echo "COGNITO_USER_POOL_ID=$(terraform output -raw  cognito_user_pool_id)" >> $GITHUB_ENV
           echo "COGNITO_CLIENT_ID=$(terraform output -raw cognito_client_id)" >> $GITHUB_ENV
-          echo "CLOUDFRONT_DOMAIN=$(terraform output -raw cloudfront_domain_name)" >> $GITHUB_ENV
+          echo "CLOUDFRONT_DOMAIN=$(terraform output -raw config_cloudfront_domain)" >> $GITHUB_ENV
           echo "CLOUDFRONT_DISTRIBUTION_ID=$(terraform output -raw cloudfront_distribution_id)" >> $GITHUB_ENV
           echo "FRONTEND_S3_BUCKET=$(terraform output -raw frontend_bucket_id)" >> $GITHUB_ENV
         working-directory: terraform

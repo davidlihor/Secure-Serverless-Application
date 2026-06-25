@@ -18,6 +18,16 @@ output "api_gateway_url" {
   value       = module.compute.api_gateway_stage_invoke_url
 }
 
+output "config_api_endpoint" {
+  description = "The API Endpoint to be written into the frontend config.js"
+  value       = var.domain_name != null ? "https://${var.domain_name}" : module.compute.api_gateway_stage_invoke_url
+}
+
+output "config_cloudfront_domain" {
+  description = "The CloudFront Domain to be written into the frontend config.js"
+  value       = var.domain_name != null ? var.domain_name : module.frontend.cloudfront_distribution_domain_name
+}
+
 output "cognito_user_pool_id" {
   description = "Cognito User Pool ID"
   value       = module.security.cognito_user_pool_id
