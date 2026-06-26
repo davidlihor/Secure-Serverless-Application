@@ -8,6 +8,22 @@ on:
       - 'frontend/**'
       - '.github/workflows/frontend.yml'
   workflow_dispatch:
+  workflow_run:
+    workflows: 
+      - Infrastructure-Governance-and-Deployment
+    types:
+      - completed
+    branches:
+      - main
+
+env:
+  AWS_REGION: us-east-1
+  BUCKET_TF_STATE: ${{ secrets.BUCKET_TF_STATE }}
+  TF_VERSION: 1.15.6
+
+permissions:
+  contents: read
+  id-token: write
 
 jobs:
   production-build:
@@ -25,7 +41,7 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install Dependencies (Production Mode)
-        run: npm install --no-fund --prefer-offline --no-audit
+        run: npm ci --prefer-offline --no-audit
         working-directory: frontend
 
       - name: Linting & Static Analysis
@@ -33,12 +49,10 @@ jobs:
         working-directory: frontend
 
       - name: Security Dependency Audit
-        continue-on-error: true
         run: npm audit --audit-level=high
         working-directory: frontend
 
       - name: Advanced Security Scan (Trivy)
-        continue-on-error: true
         uses: aquasecurity/trivy-action@v0.20.0
         with:
           scan-type: 'fs'
@@ -61,3 +75,68 @@ jobs:
           name: frontend-production-dist
           path: frontend/dist
           retention-days: 30
+
+  production-deploy:
+    name: Deploy to AWS S3 & CloudFront
+    runs-on: ubuntu-latest
+    needs: production-build
+    if: |
+      github.ref == 'refs/heads/main' && 
+      (github.event_name == 'push' || 
+       github.event_name == 'workflow_dispatch' || 
+       (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'))
+    environment: production
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-duration-seconds: 3600
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-production-dist
+          path: frontend/dist
+
+      - name: Terraform Init (remote S3)
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ env.BUCKET_TF_STATE }}" \
+            -backend-config="region=${{ env.AWS_REGION }}" \
+            -input=false
+        working-directory: terraform
+
+      - name: Extract Terraform Outputs
+        run: |
+          echo "API_GATEWAY_URL=$(terraform output -raw config_api_endpoint)" >> $GITHUB_ENV
+          echo "COGNITO_USER_POOL_ID=$(terraform output -raw cognito_user_pool_id)" >> $GITHUB_ENV
+          echo "COGNITO_CLIENT_ID=$(terraform output -raw cognito_client_id)" >> $GITHUB_ENV
+          echo "CLOUDFRONT_DOMAIN=$(terraform output -raw config_cloudfront_domain)" >> $GITHUB_ENV
+          echo "CLOUDFRONT_DISTRIBUTION_ID=$(terraform output -raw cloudfront_distribution_id)" >> $GITHUB_ENV
+          echo "FRONTEND_S3_BUCKET=$(terraform output -raw frontend_bucket_id)" >> $GITHUB_ENV
+        working-directory: terraform
+
+      - name: Configure and Deploy Frontend to S3
+        run: |
+          sed -e "s|API_URL|$API_GATEWAY_URL|g" \
+              -e "s|USER_POOL_ID|$COGNITO_USER_POOL_ID|g" \
+              -e "s|CLIENT_ID|$COGNITO_CLIENT_ID|g" \
+              -e "s|CLOUDFRONT_DOMAIN|$CLOUDFRONT_DOMAIN|g" \
+              -e "s|AWS_REGION|$AWS_REGION|g" \
+              frontend/config.js.tpl > frontend/dist/config.js
+          
+          aws s3 sync frontend/dist/ s3://${{ env.FRONTEND_S3_BUCKET }} --delete
+
+      - name: Invalidate CloudFront Cache
+        run: |
+          aws cloudfront create-invalidation --distribution-id ${{ env.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"

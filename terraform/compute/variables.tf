@@ -94,3 +94,8 @@ variable "sns_topic_arn" {
   description = "ARN of the SNS topic for CloudWatch alarm notifications"
   type        = string
 }
+
+variable "api_gateway_account_arn" {
+  description = "ARN of the API Gateway account (CloudWatch role)"
+  type        = string
+}

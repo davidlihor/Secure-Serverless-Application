@@ -82,6 +82,10 @@ resource "aws_api_gateway_stage" "prod" {
       responseLength = "$context.responseLength"
     })
   }
+
+  depends_on = [
+    var.api_gateway_account_arn
+  ]
 }
 
 resource "aws_cloudwatch_log_group" "api_gateway" {
