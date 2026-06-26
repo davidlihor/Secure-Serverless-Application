@@ -14,13 +14,6 @@ on:
       - terraform/**
       - .github/workflows/iac.yml
   workflow_dispatch:
-  workflow_run:
-    workflows: 
-      - Secure-Frontend-Build-Pipeline
-    types:
-      - completed
-    branches:
-      - main
 
 env:
   AWS_REGION: us-east-1
@@ -218,8 +211,7 @@ jobs:
     if: |
       github.ref == 'refs/heads/main' && 
       (github.event_name == 'push' || 
-       github.event_name == 'workflow_dispatch' || 
-       (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'))
+       github.event_name == 'workflow_dispatch')
     environment: production
     needs: 
       - security-and-quality-scan
@@ -239,15 +231,6 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
-      
-      - name: Download frontend build
-        uses: dawidd6/action-download-artifact@v6
-        with:
-          workflow: frontend.yml
-          workflow_conclusion: success
-          name: frontend-production-dist
-          path: frontend/dist
-          if_no_artifact_found: warn
 
       - name: Terraform Init (remote S3)
         run: |
@@ -260,28 +243,3 @@ jobs:
       - name: Terraform Apply
         run: terraform apply -auto-approve -input=false -parallelism=1
         working-directory: terraform
-
-      - name: Extract Terraform Outputs
-        run: |
-          echo "API_GATEWAY_URL=$(terraform output -raw config_api_endpoint)" >> $GITHUB_ENV
-          echo "COGNITO_USER_POOL_ID=$(terraform output -raw  cognito_user_pool_id)" >> $GITHUB_ENV
-          echo "COGNITO_CLIENT_ID=$(terraform output -raw cognito_client_id)" >> $GITHUB_ENV
-          echo "CLOUDFRONT_DOMAIN=$(terraform output -raw config_cloudfront_domain)" >> $GITHUB_ENV
-          echo "CLOUDFRONT_DISTRIBUTION_ID=$(terraform output -raw cloudfront_distribution_id)" >> $GITHUB_ENV
-          echo "FRONTEND_S3_BUCKET=$(terraform output -raw frontend_bucket_id)" >> $GITHUB_ENV
-        working-directory: terraform
-
-      - name: Configure and Deploy Frontend to S3
-        run: |
-          sed -e "s|API_URL|$API_GATEWAY_URL|g" \
-              -e "s|USER_POOL_ID|$COGNITO_USER_POOL_ID|g" \
-              -e "s|CLIENT_ID|$COGNITO_CLIENT_ID|g" \
-              -e "s|CLOUDFRONT_DOMAIN|$CLOUDFRONT_DOMAIN|g" \
-              -e "s|AWS_REGION|$AWS_REGION|g" \
-              frontend/config.js.tpl > frontend/dist/config.js
-          
-          aws s3 sync frontend/dist/ s3://${{ env.FRONTEND_S3_BUCKET }} --delete
-
-      - name: Invalidate CloudFront Cache
-        run: |
-          aws cloudfront create-invalidation --distribution-id ${{ env.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"

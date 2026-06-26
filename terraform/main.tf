@@ -98,6 +98,7 @@ module "compute" {
   kms_key_secrets_arn           = module.security.kms_key_secrets_arn
   sqs_queue_url                 = module.compute.sqs_task_deletion_queue_url
   sns_topic_arn                 = module.security.config_sns_topic_arn
+  api_gateway_account_arn       = module.security.api_gateway_account_arn
 }
 
 module "frontend" {

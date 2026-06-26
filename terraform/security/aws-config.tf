@@ -148,5 +148,10 @@ resource "aws_config_delivery_channel" "main" {
   s3_bucket_name = module.s3_config_logs.s3_bucket_id
   sns_topic_arn  = aws_sns_topic.config_updates.arn
 
-  depends_on = [aws_config_configuration_recorder.main]
+  depends_on = [
+    aws_config_configuration_recorder.main,
+    aws_s3_bucket_policy.s3_config_logs_policy,
+    aws_iam_role_policy_attachment.config_policy_attach,
+    aws_iam_role_policy.config_s3_policy
+  ]
 }
