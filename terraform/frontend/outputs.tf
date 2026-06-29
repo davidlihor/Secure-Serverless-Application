@@ -9,8 +9,8 @@ output "s3_bucket_arn" {
 }
 
 output "s3_bucket_website_endpoint" {
-  description = "Website endpoint of the S3 bucket"
-  value       = module.s3-bucket.s3_bucket_website_endpoint
+  description = "Regional domain name of the S3 bucket"
+  value       = module.s3-bucket.s3_bucket_bucket_regional_domain_name
 }
 
 output "cloudfront_distribution_id" {

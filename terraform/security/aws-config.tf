@@ -140,7 +140,8 @@ resource "aws_iam_policy" "sg_remediation_policy" {
 }
 
 resource "aws_sns_topic" "config_updates" {
-  name = "config-compliance-updates"
+  name              = "config-compliance-updates"
+  kms_master_key_id = aws_kms_key.app_encryption.arn
 }
 
 resource "aws_config_delivery_channel" "main" {

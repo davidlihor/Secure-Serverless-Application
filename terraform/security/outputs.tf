@@ -88,3 +88,13 @@ output "waf_acl_id" {
   description = "ID of the WAF Web ACL for CloudFront"
   value       = aws_wafv2_web_acl.cloudfront_waf.id
 }
+
+output "kms_key_app_encryption_arn" {
+  description = "ARN of the KMS key for general application encryption"
+  value       = aws_kms_key.app_encryption.arn
+}
+
+output "regional_waf_acl_arn" {
+  description = "ARN of the regional WAF Web ACL for API Gateway"
+  value       = aws_wafv2_web_acl.regional_waf.arn
+}

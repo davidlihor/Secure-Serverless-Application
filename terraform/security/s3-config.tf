@@ -8,6 +8,15 @@ module "s3_config_logs" {
 
   control_object_ownership = true
   object_ownership         = "BucketOwnerPreferred"
+
+  server_side_encryption_configuration = {
+    rule = {
+      apply_server_side_encryption_by_default = {
+        kms_master_key_id = aws_kms_key.app_encryption.arn
+        sse_algorithm     = "aws:kms"
+      }
+    }
+  }
 }
 
 resource "aws_s3_bucket_policy" "s3_config_logs_policy" {
@@ -16,6 +25,29 @@ resource "aws_s3_bucket_policy" "s3_config_logs_policy" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
+      {
+        Sid    = "AllowCloudTrailWrite"
+        Effect = "Allow"
+        Principal = {
+          Service = "cloudtrail.amazonaws.com"
+        }
+        Action   = "s3:PutObject"
+        Resource = "${module.s3_config_logs.s3_bucket_arn}/cloudtrail/AWSLogs/${data.aws_caller_identity.current.account_id}/*"
+        Condition = {
+          StringEquals = {
+            "s3:x-amz-acl" = "bucket-owner-full-control"
+          }
+        }
+      },
+      {
+        Sid    = "AllowCloudTrailCheck"
+        Effect = "Allow"
+        Principal = {
+          Service = "cloudtrail.amazonaws.com"
+        }
+        Action   = "s3:GetBucketAcl"
+        Resource = module.s3_config_logs.s3_bucket_arn
+      },
       {
         Sid    = "AllowConfigWrite"
         Effect = "Allow"

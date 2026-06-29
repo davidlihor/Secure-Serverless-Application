@@ -186,6 +186,27 @@ resource "aws_iam_role_policy" "lambda_kms_policy" {
   })
 }
 
+resource "aws_iam_role_policy" "lambda_app_kms_access" {
+  for_each = aws_iam_role.lambda_roles
+
+  name = "AppKMSAccess-${each.key}"
+  role = each.value.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "kms:Decrypt",
+          "kms:GenerateDataKey*"
+        ]
+        Resource = aws_kms_key.app_encryption.arn
+      }
+    ]
+  })
+}
+
 resource "aws_iam_role_policy" "ssm_secrets_access" {
   for_each = var.lambda_configs
 

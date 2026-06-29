@@ -5,32 +5,38 @@ module "s3-bucket" {
   bucket           = var.bucket_name
   bucket_namespace = "account-regional"
 
-  block_public_acls       = false
-  block_public_policy     = false
-  ignore_public_acls      = false
-  restrict_public_buckets = false
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 
   control_object_ownership = true
   object_ownership         = "ObjectWriter"
 
-  website = {
-    index_document = "index.html"
-  }
-
   versioning = {
     enabled = true
   }
+}
 
-  attach_policy = true
+resource "aws_s3_bucket_policy" "frontend_policy" {
+  bucket = module.s3-bucket.s3_bucket_id
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        Sid       = "PublicReadGetObject"
+        Sid       = "AllowCloudFrontOAC"
         Effect    = "Allow"
-        Principal = "*"
+        Principal = {
+          Service = "cloudfront.amazonaws.com"
+        }
         Action    = "s3:GetObject"
-        Resource  = "arn:aws:s3:::${var.bucket_name}/*"
+        Resource  = "${module.s3-bucket.s3_bucket_arn}/*"
+        Condition = {
+          StringEquals = {
+            "AWS:SourceArn" = aws_cloudfront_distribution.s3_distribution.arn
+          }
+        }
       }
     ]
   })

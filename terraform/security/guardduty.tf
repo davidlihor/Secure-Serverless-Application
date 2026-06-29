@@ -135,6 +135,15 @@ resource "aws_iam_role_policy" "guardduty_malware_full_access" {
         Effect   = "Allow"
         Action   = ["s3:GetObject", "s3:GetObjectVersion"]
         Resource = ["${var.s3_data_bucket_arn}/*"]
+      },
+      {
+        Sid      = "AllowKMSDecrypt"
+        Effect   = "Allow"
+        Action   = [
+          "kms:Decrypt",
+          "kms:GenerateDataKey*"
+        ]
+        Resource = [aws_kms_key.app_encryption.arn]
       }
     ]
   })

@@ -10,15 +10,9 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   }
 
   origin {
-    domain_name = module.s3-bucket.s3_bucket_website_endpoint
-    origin_id   = "S3-Website-Origin"
-
-    custom_origin_config {
-      http_port              = 80
-      https_port             = 443
-      origin_protocol_policy = "http-only"
-      origin_ssl_protocols   = ["TLSv1.2"]
-    }
+    domain_name              = module.s3-bucket.s3_bucket_bucket_regional_domain_name
+    origin_id                = "S3-Website-Origin"
+    origin_access_control_id = aws_cloudfront_origin_access_control.frontend_oac.id
   }
 
   origin {
@@ -58,12 +52,9 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
       }
     }
 
-    dynamic "function_association" {
-      for_each = var.domain_name != null ? [1] : []
-      content {
-        event_type   = "viewer-request"
-        function_arn = aws_cloudfront_function.redirect[0].arn
-      }
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.spa_routing.arn
     }
 
     viewer_protocol_policy = "redirect-to-https"
@@ -117,12 +108,6 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     compress               = true
   }
 
-  custom_error_response {
-    error_code         = 404
-    response_code      = 200
-    response_page_path = "/index.html"
-  }
-
   restrictions {
     geo_restriction {
       restriction_type = "none"
@@ -156,27 +141,32 @@ resource "aws_cloudfront_key_group" "app_key_group" {
   }
 }
 
-resource "aws_cloudfront_function" "redirect" {
-  count   = var.domain_name != null ? 1 : 0
-  name    = "redirect-to-custom-domain"
+resource "aws_cloudfront_function" "spa_routing" {
+  name    = "${var.project_name}-spa-routing"
   runtime = "cloudfront-js-1.0"
   publish = true
 
   code = <<-EOF
     function handler(event) {
         var request = event.request;
-        var host = request.headers.host.value;
-        var customDomain = '${var.domain_name}';
+        var host = request.headers.host ? request.headers.host.value : "";
+        var customDomain = '${var.domain_name != null ? var.domain_name : ""}';
+        var uri = request.uri;
 
-        if (host !== customDomain) {
+        if (customDomain && host && host !== customDomain) {
             return {
                 statusCode: 301,
                 statusDescription: 'Moved Permanently',
                 headers: {
-                    "location": { "value": "https://" + customDomain + request.uri }
+                    "location": { "value": "https://" + customDomain + uri }
                 }
             };
         }
+
+        if (uri.indexOf('.') === -1 && uri.indexOf('/api/') !== 0 && uri.indexOf('/users/') !== 0) {
+            request.uri = '/index.html';
+        }
+
         return request;
     }
   EOF
@@ -199,4 +189,12 @@ resource "aws_route53_record" "root_domain" {
     zone_id                = aws_cloudfront_distribution.s3_distribution.hosted_zone_id
     evaluate_target_health = false
   }
+}
+
+resource "aws_cloudfront_origin_access_control" "frontend_oac" {
+  name                              = "${var.project_name}-frontend-oac"
+  description                       = "Origin Access Control for Frontend S3 Bucket"
+  origin_access_control_origin_type = "s3"
+  signing_behavior                  = "always"
+  signing_protocol                  = "sigv4"
 }

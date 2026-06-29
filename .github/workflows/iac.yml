@@ -73,7 +73,7 @@ jobs:
           directory: ./terraform
           output_format: sarif
           output_file_path: ${{ github.workspace }}/terraform/checkov-results.sarif
-          soft_fail: true
+          soft_fail: false
 
       - name: Setup TFLint (Deep Static Analysis)
         uses: terraform-linters/setup-tflint@v3
@@ -105,7 +105,7 @@ jobs:
           severity: HIGH,CRITICAL
           format: sarif
           output: trivy-results.sarif
-          exit-code: 0
+          exit-code: 1
           security-checks: config
  
   plan:

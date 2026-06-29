@@ -16,6 +16,15 @@ module "s3_data" {
 
   versioning = { enabled = true }
 
+  server_side_encryption_configuration = {
+    rule = {
+      apply_server_side_encryption_by_default = {
+        kms_master_key_id = var.kms_key_arn
+        sse_algorithm     = "aws:kms"
+      }
+    }
+  }
+
   lifecycle_rule = [{
     id      = "intelligent-tiering"
     enabled = true
@@ -25,14 +34,18 @@ module "s3_data" {
       storage_class = "INTELLIGENT_TIERING"
     }]
   }]
+}
 
-  cors_rule = [{
+resource "aws_s3_bucket_cors_configuration" "data" {
+  bucket = module.s3_data.s3_bucket_id
+
+  cors_rule {
     allowed_headers = ["*"]
     allowed_methods = ["PUT", "POST", "GET"]
-    allowed_origins = ["*"]
+    allowed_origins = var.allowed_origins
     expose_headers  = ["ETag"]
     max_age_seconds = 3000
-  }]
+  }
 }
 
 resource "aws_cloudfront_origin_access_control" "s3_oac" {

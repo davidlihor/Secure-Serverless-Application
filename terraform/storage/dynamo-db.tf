@@ -18,6 +18,11 @@ resource "aws_dynamodb_table" "cloudstack_table" {
     enabled = var.is_production
   }
 
+  server_side_encryption {
+    enabled     = true
+    kms_key_arn = var.kms_key_arn
+  }
+
   tags = {
     Name = "${var.project_name}-Table"
   }

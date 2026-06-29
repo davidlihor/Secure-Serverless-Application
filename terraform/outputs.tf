@@ -9,7 +9,7 @@ output "frontend_bucket_id" {
 }
 
 output "s3_website_url" {
-  description = "S3 bucket website endpoint URL"
+  description = "S3 bucket regional domain name"
   value       = module.frontend.s3_bucket_website_endpoint
 }
 

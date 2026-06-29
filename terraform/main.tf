@@ -74,6 +74,8 @@ module "storage" {
   is_production               = var.is_production
   bucket_data                 = local.bucket_data
   cloudfront_distribution_arn = module.frontend.cloudfront_distribution_arn
+  kms_key_arn                 = module.security.kms_key_app_encryption_arn
+  allowed_origins             = var.domain_name != null ? ["https://${var.domain_name}"] : ["https://${module.frontend.cloudfront_distribution_domain_name}"]
 }
 
 module "compute" {
@@ -96,9 +98,11 @@ module "compute" {
   s3_data_bucket_id             = module.storage.s3_data_bucket_id
   kms_key_cloudfront_signer_arn = module.security.kms_key_cloudfront_signer_arn
   kms_key_secrets_arn           = module.security.kms_key_secrets_arn
+  kms_key_app_encryption_arn    = module.security.kms_key_app_encryption_arn
   sqs_queue_url                 = module.compute.sqs_task_deletion_queue_url
   sns_topic_arn                 = module.security.config_sns_topic_arn
   api_gateway_account_arn       = module.security.api_gateway_account_arn
+  regional_waf_acl_arn          = module.security.regional_waf_acl_arn
 }
 
 module "frontend" {

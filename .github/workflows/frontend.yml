@@ -49,12 +49,10 @@ jobs:
         working-directory: frontend
 
       - name: Security Dependency Audit
-        continue-on-error: true
         run: npm audit --audit-level=high
         working-directory: frontend
 
       - name: Advanced Security Scan (Trivy)
-        continue-on-error: true
         uses: aquasecurity/trivy-action@v0.20.0
         with:
           scan-type: 'fs'

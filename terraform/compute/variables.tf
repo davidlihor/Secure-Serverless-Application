@@ -85,6 +85,11 @@ variable "kms_key_secrets_arn" {
   type        = string
 }
 
+variable "kms_key_app_encryption_arn" {
+  description = "ARN of the KMS key for general application encryption"
+  type        = string
+}
+
 variable "sqs_queue_url" {
   description = "URL of the task deletion SQS queue"
   type        = string
@@ -97,5 +102,10 @@ variable "sns_topic_arn" {
 
 variable "api_gateway_account_arn" {
   description = "ARN of the API Gateway account (CloudWatch role)"
+  type        = string
+}
+
+variable "regional_waf_acl_arn" {
+  description = "ARN of the regional WAF Web ACL to associate with API Gateway"
   type        = string
 }

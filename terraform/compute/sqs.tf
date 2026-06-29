@@ -1,12 +1,16 @@
 resource "aws_sqs_queue" "task_deletion_dlq" {
   name                      = "cloudstack-task-deletion-dlq"
   message_retention_seconds = 1209600
+  kms_master_key_id                 = var.kms_key_app_encryption_arn
+  kms_data_key_reuse_period_seconds = 300
 }
 
 resource "aws_sqs_queue" "task_deletion_queue" {
   name                      = "cloudstack-task-deletion-queue"
   message_retention_seconds = 86400
   receive_wait_time_seconds = 10
+  kms_master_key_id                 = var.kms_key_app_encryption_arn
+  kms_data_key_reuse_period_seconds = 300
 
   redrive_policy = jsonencode({
     deadLetterTargetArn = aws_sqs_queue.task_deletion_dlq.arn
@@ -18,6 +22,8 @@ resource "aws_sqs_queue" "image_processing_queue" {
   name                      = "cloudstack-image-processing-queue"
   message_retention_seconds = 86400
   receive_wait_time_seconds = 10
+  kms_master_key_id                 = var.kms_key_app_encryption_arn
+  kms_data_key_reuse_period_seconds = 300
 }
 
 resource "aws_pipes_pipe" "sqs_to_sfn_cleanup" {
